@@ -30,6 +30,7 @@ app.use(express.json())
 
 app.post('/chatcomplition', async (req, res) => {
     const { messages } = req.body
+    if(!message) return res.status(400).json({message:"No message body"})
     try {
         const response = await generateAITextResponse(messages, token)
         res.json(response.choices[0].message).status(200)
