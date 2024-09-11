@@ -1,6 +1,6 @@
 import { config } from "dotenv";
 import { generateAITextResponse, generateImageCaption } from "./utils.js";
-import corse from 'cors'
+import cors from 'cors'
 import express from 'express'
 import multer from "multer";
 import path from 'path'
@@ -24,13 +24,13 @@ const storage = multer.diskStorage({
 const uploads = multer({ storage })
 
 
-app.use(corse());
+app.use(cors());
 app.use(express.json())
 
 
 app.post('/chatcomplition', async (req, res) => {
     const { messages } = req.body
-    if(!message) return res.status(400).json({message:"No message body"})
+    if(!messages) return res.status(400).json({message:"No message body"})
     try {
         const response = await generateAITextResponse(messages, token)
         res.json(response.choices[0].message).status(200)
