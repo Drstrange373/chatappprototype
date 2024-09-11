@@ -4,7 +4,8 @@ import corse from 'cors'
 import express from 'express'
 import multer from "multer";
 import path from 'path'
-import {  unlink} from "fs/promises";
+import { unlink } from "fs/promises";
+import { handelError } from "./middleware.js";
 
 config();
 
@@ -13,13 +14,14 @@ const port = process.env.PORT || 3000;
 const app = express();
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, './temp'); // Destination folder
+        cb(null, './temp'); // Destination folder
     },
     filename: function (req, file, cb) {
-      cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname)); // Filename
-    }
-  });
-const uploads = multer({storage})
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname)); // Filename
+    },
+
+});
+const uploads = multer({ storage })
 
 
 app.use(corse());
@@ -35,11 +37,9 @@ app.post('/chatcomplition', async (req, res) => {
         console.error(e)
         res.status(500).json({ error: e.message })
     }
-
-
 })
 
-app.post('/imagecaption', uploads.single('image'),async (req, res) => {
+app.post('/imagecaption', uploads.single('image'), handelError, async (req, res) => {
     try {
         if (!req.file) return res.json({ message: "Something went wrong" }).status(400)
         const caption = await generateImageCaption(req.file.path, token)
