@@ -1,7 +1,7 @@
 import { config } from "dotenv";
-import { generateAITextResponse, generateImageCaption } from "./utils.js";
+import { generateAITextResponse, generateImageCaption, getObjectsFromImage, getTextContentFromImage } from "./utils.js";
 import cors from 'cors'
-import express from 'express'
+import express, { text } from 'express'
 import multer from "multer";
 import path from 'path'
 import { unlink } from "fs/promises";
@@ -40,11 +40,25 @@ app.post('/chatcomplition', async (req, res) => {
     }
 })
 
-app.post('/imagecaption', uploads.single('image'), handelError, async (req, res) => {
+app.post('/imageinfo', uploads.single('image'), handelError, async (req, res) => {
     try {
         if (!req.file) return res.json({ message: "Something went wrong" }).status(400)
+
+        //  
         const caption = await generateImageCaption(req.file.path, token)
-        res.json(caption).status(200)
+        const objects = await getObjectsFromImage(req.file.path, token)
+        const textInfo = await getTextContentFromImage(req.file.path)
+
+        const responseObject = {
+            caption:caption.generated_text,
+            objects,
+            textInfo:{
+                confidence:textInfo.confidence,
+                content:textInfo.text
+            }
+        }
+
+        res.json(responseObject).status(200)
         unlink(req.file.path)
 
     } catch (error) {
@@ -86,17 +100,21 @@ app.listen(port, () => console.log(`Server running on port ${port}`));
 
 
 // (async function () {
-//     const conversation = [
-//         { role: 'user', content: 'Hey' },
-//         { role: 'system', content: 'How can I help you?' },
-//         {role:'user', content:"What is the best song in English? Pop"}
+//     // const conversation = [
+//     //     { role: 'user', content: 'Hey' },
+//     //     { role: 'system', content: 'How can I help you?' },
+//     //     {role:'user', content:"What is the best song in English? Pop"}
 
-//       ];
-//     const res = await generateAITextResponse(conversation, token)
-//     // const res = await generateImageCaption('./download.jpeg', token)
+//     //   ];
+//     // const res = await generateAITextResponse(conversation, token)
+//     const res = await generateImageCaption('./download.jpeg', token)
 
+//     // const res = await getTextContentFromImage('./download (1).jpeg')
+
+//     // const res = await getObjectsFromImage('./download (1).jpeg', token)
 //     console.log(res);
-//     console.log(res.choices[0].message)
+
+//     // console.log(res.choices[0].message)
 
 
 // })();

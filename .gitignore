@@ -12,6 +12,7 @@ node_modules
 dist
 dist-ssr
 *.local
+eng.traineddata
 
 # Editor directories and files
 .vscode/*
