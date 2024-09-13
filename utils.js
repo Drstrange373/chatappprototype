@@ -11,7 +11,7 @@ export async function generateAITextResponse(messages, hfToken) {
     const hf = new HfInference(hfToken)
       // Flatten the conversation into a single string
       const out = await hf.chatCompletion({
-        model: "google/gemma-2-2b-it",
+        model: "mistralai/Mistral-Nemo-Instruct-2407",
         messages
       });
       return out
