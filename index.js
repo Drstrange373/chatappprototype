@@ -30,7 +30,7 @@ app.use(express.json())
 
 app.post('/chatcomplition', async (req, res) => {
     const { messages } = req.body
-    if(!messages) return res.status(400).json({message:"No message body"})
+    if (!messages) return res.status(400).json({ message: "No message body" })
     try {
         const response = await generateAITextResponse(messages, token)
         res.json(response.choices[0].message).status(200)
@@ -45,16 +45,20 @@ app.post('/imageinfo', uploads.single('image'), handelError, async (req, res) =>
         if (!req.file) return res.json({ message: "Something went wrong" }).status(400)
 
         //  
-        const caption = await generateImageCaption(req.file.path, token)
-        const objects = await getObjectsFromImage(req.file.path, token)
-        const textInfo = await getTextContentFromImage(req.file.path)
+        const p1 = generateImageCaption(req.file.path, token)
+        const p2 = getObjectsFromImage(req.file.path, token)
+        const p3 = getTextContentFromImage(req.file.path)
+
+        const [caption, objects, textInfo] = await Promise.all([p1, p2, p3])
+
+
 
         const responseObject = {
-            caption:caption.generated_text,
+            caption: caption.generated_text,
             objects,
-            textInfo:{
-                confidence:textInfo.confidence,
-                content:textInfo.text
+            textInfo: {
+                confidence: textInfo.confidence,
+                content: textInfo.text
             }
         }
 
